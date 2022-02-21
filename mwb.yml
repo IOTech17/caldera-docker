@@ -1,0 +1,64 @@
+ability_refresh: 60
+api_key_blue: 786b436e-96c8-4501-b2a2-d07f5b00f82e
+api_key_red: cdadc365-e7b1-49ac-9d6a-1c9aea1d7398
+app.contact.dns.domain: caldera.mwb-threatintel.com
+app.contact.dns.socket: 0.0.0.0:8853
+app.contact.gist: API_KEY
+app.contact.html: /weather
+app.contact.http: http://0.0.0.0:8888
+app.contact.slack.api_key: SLACK_TOKEN
+app.contact.slack.bot_id: SLACK_BOT_ID
+app.contact.slack.channel_id: SLACK_CHANNEL_ID
+app.contact.tunnel.ssh.host_key_file: REPLACE_WITH_KEY_FILE_PATH
+app.contact.tunnel.ssh.host_key_passphrase: REPLACE_WITH_KEY_FILE_PASSPHRASE
+app.contact.tunnel.ssh.socket: 0.0.0.0:8022
+app.contact.tunnel.ssh.user_name: mwbti
+app.contact.tunnel.ssh.user_password: M@lwarebytes9!
+app.contact.ftp.host: 0.0.0.0
+app.contact.ftp.port: 2222
+app.contact.ftp.pword: mwbtiftp
+app.contact.ftp.server.dir: M@lwarebytes9!
+app.contact.ftp.user: caldera_user
+app.contact.tcp: 0.0.0.0:7010
+app.contact.udp: 0.0.0.0:7011
+app.contact.websocket: 0.0.0.0:7012
+objects.planners.default: atomic
+crypt_salt: 7VZLfr3vDtWMaV9q
+encryption_key: hWmZq4t7w!z%C*F-JaNdRgUkXn2r5u8x/A?D(G+KbPeShVmYq3s6v9y$B&E)H@McQfTjWnZr4u7w!z%C*F-JaNdRgUkXp2s5v8y/A?D(G+KbPeShVmYq3t6w9z$C&E)H
+exfil_dir: /tmp/caldera
+host: 0.0.0.0
+plugins:
+- access
+- atomic
+- compass
+- debrief
+- fieldmanual
+- manx
+- response
+- sandcat
+- stockpile
+- training
+- gameboard
+- human
+- training
+- builder
+- emu
+port: 8888
+reports_dir: /tmp
+auth.login.handler.module: default
+requirements:
+  go:
+    command: go version
+    type: installed_program
+    version: 1.11
+  python:
+    attr: version
+    module: sys
+    type: python_module
+    version: 3.7.0
+users:
+  blue:
+    blue: admin
+  red:
+    admin: admin
+    red: admin

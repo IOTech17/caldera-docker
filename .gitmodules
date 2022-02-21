@@ -1,4 +1,3 @@
 [submodule "caldera"]
 	path = caldera
 	url = https://github.com/mitre/caldera
-	branch = master

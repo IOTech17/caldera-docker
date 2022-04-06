@@ -1,4 +1,5 @@
-FROM ubuntu:focal
+FROM ubuntu:latest
+SHELL ["/bin/bash", "-c"]
 
 ARG TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
@@ -7,7 +8,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
 WORKDIR /usr/src/app
 
 RUN apt-get update && \
-    apt-get -y install python3 python3-pip golang git upx zlib1g
+    apt-get -y install python3 python3-pip git upx zlib1g curl
 
 #WIN_BUILD is used to enable windows build in sandcat plugin
 ARG WIN_BUILD=true
@@ -21,31 +22,24 @@ RUN git clone --recursive https://github.com/mitre/caldera.git .
 RUN pip3 install --no-cache-dir -r requirements.txt
 RUN pip3 install markupsafe==2.0.1
 
-#ADD . .
+# Install golang
+RUN curl -L https://go.dev/dl/go1.17.6.linux-amd64.tar.gz -o go1.17.6.linux-amd64.tar.gz
+RUN rm -rf /usr/local/go && tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz;
+ENV PATH="${PATH}:/usr/local/go/bin"
+RUN go version;
 
-ADD ./mwb.yml /usr/src/app/conf/
+# Compile default sandcat agent binaries, which will download basic golang dependencies.
+WORKDIR /usr/src/app/plugins/sandcat
 
 ADD ./payloads/. /usr/src/app/plugins/emu/payloads/
 
-# Download golang dependencies
-RUN go get github.com/grandcat/zeroconf       \
-           github.com/google/go-github/github \
-           github.com/grandcat/zeroconf       \
-           github.com/miekg/dns               \
-           golang.org/x/oauth2                \
-           gopkg.in/natefinch/npipe.v2
-
-# Update default sandcat agent binaries
-WORKDIR /usr/src/app/plugins/sandcat
-
 RUN ./update-agents.sh
 
-# Check if we can compile the sandcat extensions
+# Check if we can compile the sandcat extensions, which will download golang dependencies for agent extensions
 RUN mkdir /tmp/gocatextensionstest
+RUN cp -R ./gocat /tmp/gocatextensionstest/gocat
+RUN cp -R ./gocat-extensions/* /tmp/gocatextensionstest/gocat/
 
-RUN cp -R ./gocat-extensions /tmp/gocatextensionstest/gocat
-
-RUN cp -R ./gocat /tmp/gocatextensionstest/
 RUN cp ./update-agents.sh /tmp/gocatextensionstest/update-agents.sh
 
 WORKDIR /tmp/gocatextensionstest
@@ -62,9 +56,11 @@ fi
 
 
 #install builder plugin dependencies
-#WORKDIR /usr/src/app/plugins/builder
+WORKDIR /usr/src/app/plugins/builder
 
 #RUN ./install.sh
+
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 WORKDIR /usr/src/app/plugins/human
 
@@ -74,11 +70,11 @@ WORKDIR /usr/src/app
 
 RUN apt-get remove --purge -y --allow-remove-essential apt wget && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-#RUN useradd -ms /bin/bash caldera
+RUN useradd -ms /bin/bash caldera
 
-#RUN chown -R caldera:caldera /usr/src/app
+RUN chown -R caldera:caldera /usr/src/app
 
-#USER caldera
+USER caldera
 
 # Default HTTP port for web interface and agent beacons over HTTP
 EXPOSE 8888

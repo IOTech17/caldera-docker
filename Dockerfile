@@ -18,6 +18,7 @@ RUN git clone --recursive https://github.com/mitre/caldera.git .
 
 # Install pip requirements
 #ADD requirements.txt .
+RUN sed -i 's/pyminizip==0.2.4/pyminizip==0.2.6/g' requirements.txt
 
 RUN pip3 install --no-cache-dir -r requirements.txt
 RUN pip3 install markupsafe==2.0.1
@@ -68,13 +69,13 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 WORKDIR /usr/src/app
 
-RUN apt-get remove --purge -y --allow-remove-essential apt wget && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get remove --purge -y --allow-remove-essential apt wget curl && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN useradd -ms /bin/bash caldera
+#RUN useradd -ms /bin/bash caldera
 
-RUN chown -R caldera:caldera /usr/src/app
+#RUN chown -R caldera:caldera /usr/src/app
 
-USER caldera
+#USER caldera
 
 # Default HTTP port for web interface and agent beacons over HTTP
 EXPOSE 8888

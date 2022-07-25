@@ -8,7 +8,10 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
 WORKDIR /usr/src/app
 
 RUN apt-get update && \
-    apt-get -y install python3 python3-pip git upx zlib1g curl
+    apt-get upgrade -y \
+    apt-get -y install python3 python3-pip git upx zlib1g curl wget
+    
+RUN git config --global http.postBuffer 1048576000
 
 #WIN_BUILD is used to enable windows build in sandcat plugin
 ARG WIN_BUILD=true
@@ -32,7 +35,7 @@ RUN go version;
 # Compile default sandcat agent binaries, which will download basic golang dependencies.
 WORKDIR /usr/src/app/plugins/sandcat
 
-ADD ./payloads/. /usr/src/app/plugins/emu/payloads/
+COPY ./payloads/. /usr/src/app/plugins/emu/payloads/
 
 RUN ./update-agents.sh
 
@@ -100,3 +103,5 @@ EXPOSE 8022
 EXPOSE 2222
 
 ENTRYPOINT ["python3", "server.py"]
+HEALTHCHECK --interval=30s --timeout=5s\
+    CMD wget --no-check-certificate --spider -S https://localhost:8888 2>&1 > /dev/null | grep -q "200 OK$"

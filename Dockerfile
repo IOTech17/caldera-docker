@@ -8,7 +8,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
 WORKDIR /usr/src/app
 
 RUN apt-get update && \
-    apt-get upgrade -y \
+    apt-get upgrade -y && \
     apt-get -y install python3 python3-pip git upx zlib1g curl wget
     
 RUN git config --global http.postBuffer 1048576000

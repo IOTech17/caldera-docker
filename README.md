@@ -9,7 +9,7 @@ version: '3'
 services:
   caldera:
     privileged: true
-    image: iotech17caldera:latest
+    image: iotech17/caldera:latest
     ports:
       - "8888:8888"
       - "8443:8443"

@@ -21,7 +21,7 @@ services:
       - "2222:2222"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/acwg/Downloads/mwb.yml:/usr/src/app/conf/mwb.yml:ro
+      - /path/config.yml:/usr/src/app/conf/mwb.yml:ro
       - app:/usr/src/app
     command: --fresh --log DEBUG --environment mwb
 volumes:

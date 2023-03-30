@@ -1,3 +1,8 @@
+Docker Compose
+
+You need to expose a config file directly into the container
+
+```
 version: '3'
 services:
   caldera:

@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get -y install python3 python3-pip git upx zlib1g curl wget
+    apt-get -y install python3 python3-pip git upx zlib1g curl wget unzip
     
 RUN git config --global http.postBuffer 1048576000
 
@@ -35,7 +35,7 @@ RUN go version;
 # Compile default sandcat agent binaries, which will download basic golang dependencies.
 WORKDIR /usr/src/app/plugins/sandcat
 
-COPY ./payloads/. /usr/src/app/plugins/emu/payloads/
+#COPY ./payloads/. /usr/src/app/plugins/emu/payloads/
 
 RUN ./update-agents.sh
 
@@ -72,7 +72,9 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 WORKDIR /usr/src/app
 
-RUN apt-get remove --purge -y --allow-remove-essential apt wget curl && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN pip3 install pyminizip
+
+RUN apt-get remove --purge -y --allow-remove-essential apt && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #RUN useradd -ms /bin/bash caldera
 
@@ -103,5 +105,3 @@ EXPOSE 8022
 EXPOSE 2222
 
 ENTRYPOINT ["python3", "server.py"]
-HEALTHCHECK --interval=30s --timeout=5s\
-    CMD wget --no-check-certificate --spider -S https://localhost:8888 2>&1 > /dev/null | grep -q "200 OK$"

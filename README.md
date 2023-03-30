@@ -1,10 +1,3 @@
-# caldera-docker
-
-Dockerized version of Mitre Caldera Server
-
-docker compose
-
-```version: '3'
 version: '3'
 services:
   caldera:
@@ -21,11 +14,15 @@ services:
       - "2222:2222"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /path/config.yml:/usr/src/app/conf/mwb.yml:ro
+      - /path/to/file/conf.yml:/usr/src/app/conf/conf.yml:ro
       - app:/usr/src/app
-    command: --fresh --log DEBUG --environment mwb
+    command: --fresh --log DEBUG --environment conf
+    
+    healthcheck:
+      test: wget --no-check-certificate --spider -S http://localhost:8888 2>&1 > /dev/null | grep -q "200 OK$"
+      interval: 60s
+      retries: 5
+      start_period: 20s
+      timeout: 10s
 volumes:
   app:
-  ```
-
-Simply pass the conf file directly into the container

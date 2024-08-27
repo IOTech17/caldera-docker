@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get -y install python3 python3-pip git upx zlib1g curl wget unzip
+    apt-get -y install python3 python3-pip python3-venv git curl golang-go upx zlib1g wget unzip npm nodejs libxml2 libxslt1-dev
     
 RUN git config --global http.postBuffer 1048576000
 
@@ -19,23 +19,18 @@ RUN if [ "$WIN_BUILD" = "true" ] ; then apt-get -y install mingw-w64; fi
 
 RUN git clone --recursive https://github.com/mitre/caldera.git .
 
-# Install pip requirements
-#ADD requirements.txt .
-RUN sed -i 's/pyminizip==0.2.4/pyminizip==0.2.6/g' requirements.txt
+# Set up python virtualenv
+ENV VIRTUAL_ENV=/opt/venv/caldera
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN pip3 install --no-cache-dir -r requirements.txt
-RUN pip3 install markupsafe==2.0.1
 
-# Install golang
-RUN curl -L https://go.dev/dl/go1.17.6.linux-amd64.tar.gz -o go1.17.6.linux-amd64.tar.gz
-RUN rm -rf /usr/local/go && tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz;
-ENV PATH="${PATH}:/usr/local/go/bin"
-RUN go version;
+WORKDIR /usr/src/app/plugins/sandcat/gocat
+RUN go mod tidy && go mod download
 
 # Compile default sandcat agent binaries, which will download basic golang dependencies.
 WORKDIR /usr/src/app/plugins/sandcat
-
-#COPY ./payloads/. /usr/src/app/plugins/emu/payloads/
 
 RUN ./update-agents.sh
 
@@ -53,16 +48,16 @@ RUN mkdir /tmp/gocatextensionstest/payloads
 RUN ./update-agents.sh
 
 # Clone atomic red team repo for the atomic plugin
-RUN if [ ! -d "/usr/src/app/plugins/atomic/data/atomic-red-team" ]; then   \
-    git clone --depth 1 https://github.com/redcanaryco/atomic-red-team.git \
-        /usr/src/app/plugins/atomic/data/atomic-red-team;                  \
-fi
+RUN git clone --depth 1 https://github.com/redcanaryco/atomic-red-team.git \
+        /usr/src/app/plugins/atomic/data/atomic-red-team;
 
+WORKDIR /usr/src/app/plugins/emu
+
+# If emu is enabled, complete necessary installation steps
+RUN pip3 install -r requirements.txt && ./download_payloads.sh;
 
 #install builder plugin dependencies
 WORKDIR /usr/src/app/plugins/builder
-
-#RUN ./install.sh
 
 RUN pip3 install --no-cache-dir -r requirements.txt
 
@@ -70,17 +65,21 @@ WORKDIR /usr/src/app/plugins/human
 
 RUN pip3 install --no-cache-dir -r requirements.txt
 
+WORKDIR /usr/src/app/plugins/stockpile
+
+RUN pip3 install --no-cache-dir -r requirements.txt
+
 WORKDIR /usr/src/app
 
-RUN pip3 install pyminizip
+RUN (cd plugins/magma && npm install) && \
+    (cd plugins/magma && npm run build) && \
+    pip3 install pyminizip setuptools && \
+    apt-get remove --purge -y --allow-remove-essential apt &&\ 
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN apt-get remove --purge -y --allow-remove-essential apt && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+WORKDIR /usr/src/app
 
-#RUN useradd -ms /bin/bash caldera
-
-#RUN chown -R caldera:caldera /usr/src/app
-
-#USER caldera
+STOPSIGNAL SIGINT
 
 # Default HTTP port for web interface and agent beacons over HTTP
 EXPOSE 8888

@@ -24,10 +24,9 @@ services:
     command: --insecure --build --fresh --log DEBUG
     
     healthcheck:
-      test: wget --no-check-certificate --spider -S http://localhost:8888 2>&1 > /dev/null | grep -q "200 OK$"
-      interval: 60s
-      retries: 5
-      start_period: 20s
+      test: ["CMD-SHELL", "wget --no-check-certificate --spider -S http://localhost:8888 || exit 1"]
+      interval: 30s
       timeout: 10s
+      retries: 3
 volumes:
   app:

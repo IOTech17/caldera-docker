@@ -3,7 +3,7 @@ Docker Compose
 You need to expose a config file directly into the container
 
 ```
-version: '3'
+version: '3.8'
 services:
   caldera:
     privileged: true
@@ -19,9 +19,9 @@ services:
       - "2222:2222"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /path/to/file/conf.yml:/usr/src/app/conf/conf.yml:ro
+      - /path/caldera.yml:/usr/src/app/conf/default.yml
       - app:/usr/src/app
-    command: --fresh --log DEBUG --environment conf
+    command: --insecure --build --fresh --log DEBUG
     
     healthcheck:
       test: wget --no-check-certificate --spider -S http://localhost:8888 2>&1 > /dev/null | grep -q "200 OK$"

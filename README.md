@@ -7,7 +7,7 @@ version: '3.8'
 services:
   caldera:
     privileged: true
-    image: iotech17/caldera:latest
+    image: iotech17/caldera-docker:latest
     ports:
       - "8888:8888"
       - "8443:8443"
